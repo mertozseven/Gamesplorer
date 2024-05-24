@@ -9,4 +9,7 @@ import UIKit
 
 class GamesCell: UICollectionViewCell {
     
+    // MARK: - UI Components
+    
+    
 }
