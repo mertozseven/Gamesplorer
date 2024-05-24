@@ -7,18 +7,29 @@
 
 import Foundation
 
+protocol GameViewModelDelegate: AnyObject {
+    func reloadData()
+}
+
+protocol GameViewModelProtocol {
+    var delegate: GameViewModelDelegate? { get set }
+    func loadGames(page: Int)
+    func game(at index: IndexPath) -> Game?
+}
+
 final class GameViewModel {
-    
+
+    let service: GameServiceProtocol
     private(set) var games: [Game] = []
-    private var apiManager: GameServiceProtocol
     private var nextPageURL: String?
+    weak var delegate: GameViewModelDelegate?
     
-    init(apiManager: GameServiceProtocol = API.shared) {
-        self.apiManager = apiManager
+    init(service: GameServiceProtocol = API.shared) {
+        self.service = service
     }
     
-    func fetchGames(page: Int = 1, completion: @escaping () -> Void) {
-        apiManager.fetchGames(page: page) { [weak self] result in
+    fileprivate func fetchGames(page: Int = 1) {
+        service.fetchGames(page: page) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let gameResponse):
@@ -28,31 +39,42 @@ final class GameViewModel {
                     self.games.append(contentsOf: gameResponse.results)
                 }
                 self.nextPageURL = gameResponse.next
-                completion()
+                DispatchQueue.main.async {
+                    self.delegate?.reloadData()
+                }
             case .failure(let error):
                 print(error.localizedDescription)
-                completion()
             }
         }
     }
     
-    func fetchNextPage(completion: @escaping () -> Void) {
-        guard let nextPageURL = nextPageURL else {
-            completion()
-            return
-        }
-        
-        apiManager.fetchNextPage(nextPageURL: nextPageURL) { [weak self] result in
+    fileprivate func fetchNextPage() {
+        guard let nextPageURL = nextPageURL else { return }
+        service.fetchNextPage(nextPageURL: nextPageURL) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let gameResponse):
                 self.games.append(contentsOf: gameResponse.results)
                 self.nextPageURL = gameResponse.next
-                completion()
+                DispatchQueue.main.async {
+                    self.delegate?.reloadData()
+                }
             case .failure(let error):
                 print(error.localizedDescription)
-                completion()
             }
         }
     }
+}
+
+extension GameViewModel: GameViewModelProtocol {
+    
+    func loadGames(page: Int = 1) {
+        fetchGames(page: page)
+    }
+    
+    func game(at index: IndexPath) -> Game? {
+        guard index.row < games.count else { return nil }
+        return games[index.row]
+    }
+    
 }

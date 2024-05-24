@@ -23,7 +23,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private func setupTabBarController() -> UITabBarController {
         let tabBarController = UITabBarController()
         
-        let homeVC = UINavigationController(rootViewController: HomeViewController(viewModel: GameViewModel(apiManager: APIManager())))
+        let homeVC = UINavigationController(rootViewController: HomeViewController(viewModel: GameViewModel(service: API.shared)))
         homeVC.tabBarItem = UITabBarItem(title: "Home", image: UIImage(systemName: "house"), tag: 0)
         
         let favoritesVC = UINavigationController(rootViewController: FavoritesViewController())
