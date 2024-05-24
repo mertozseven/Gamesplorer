@@ -9,6 +9,7 @@ import Foundation
 
 protocol GameViewModelDelegate: AnyObject {
     func reloadData()
+    func showError()
 }
 
 protocol GameViewModelProtocol {
@@ -18,9 +19,10 @@ protocol GameViewModelProtocol {
 }
 
 final class GameViewModel {
-
+    
     let service: GameServiceProtocol
-    private(set) var games: [Game] = []
+    private(set) var games: [Game]? = []
+    
     private var nextPageURL: String?
     weak var delegate: GameViewModelDelegate?
     
@@ -36,7 +38,7 @@ final class GameViewModel {
                 if page == 1 {
                     self.games = gameResponse.results
                 } else {
-                    self.games.append(contentsOf: gameResponse.results)
+                    self.games?.append(contentsOf: gameResponse.results)
                 }
                 self.nextPageURL = gameResponse.next
                 DispatchQueue.main.async {
@@ -44,26 +46,13 @@ final class GameViewModel {
                 }
             case .failure(let error):
                 print(error.localizedDescription)
+                DispatchQueue.main.async {
+                    self.delegate?.showError()
+                }
             }
         }
     }
     
-    fileprivate func fetchNextPage() {
-        guard let nextPageURL = nextPageURL else { return }
-        service.fetchNextPage(nextPageURL: nextPageURL) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let gameResponse):
-                self.games.append(contentsOf: gameResponse.results)
-                self.nextPageURL = gameResponse.next
-                DispatchQueue.main.async {
-                    self.delegate?.reloadData()
-                }
-            case .failure(let error):
-                print(error.localizedDescription)
-            }
-        }
-    }
 }
 
 extension GameViewModel: GameViewModelProtocol {

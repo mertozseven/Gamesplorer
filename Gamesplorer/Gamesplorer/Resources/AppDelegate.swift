@@ -12,13 +12,10 @@ import Kingfisher
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     
-    
-    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        
-        // Configure Kingfisher cache settings
         let cache = ImageCache.default
-        cache.memoryStorage.config.totalCostLimit = 50 * 1024 * 1024 // 100 MB
+        cache.memoryStorage.config.totalCostLimit = 100 * 1024 * 1024 // 50 MB
+        cache.diskStorage.config.sizeLimit = 100 * 1024 * 1024 // 100 MB
         
         return true
     }

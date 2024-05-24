@@ -7,12 +7,28 @@
 
 import UIKit
 
-final class HomeViewController: BaseViewController {
+final class HomeViewController: UIViewController {
     
     // MARK: - UI Components
     private let topView = GPTopView()
     
     private var pageViewController: GamePageViewController!
+    
+    private lazy var gamesListCollectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.minimumInteritemSpacing = 0
+        layout.minimumLineSpacing = 0
+        layout.scrollDirection = .vertical
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.register(GamesCell.self, forCellWithReuseIdentifier: GamesCell.identifier)
+        collectionView.isScrollEnabled = false
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.backgroundColor = .clear
+        collectionView.isUserInteractionEnabled = true
+        
+        return collectionView
+    }()
     
     // MARK: - Properties
     private var viewModel: GameViewModel!
@@ -21,7 +37,7 @@ final class HomeViewController: BaseViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureView()
-        viewModel.loadGames(page: 1)
+        viewModel.loadGames(page: 2)
     }
     
     // MARK: - Inits
@@ -70,26 +86,67 @@ final class HomeViewController: BaseViewController {
             top: topView.bottomAnchor,
             paddingTop: 16,
             leading: view.leadingAnchor,
-            paddingLeading: 8,
             trailing: view.trailingAnchor,
-            paddingTrailing: 8,
             height: 256
         )
     }
     
+    private func showErrorAlert() {
+        let alert = UIAlertController(title: "Error", message: "Please try again", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Reload", style: .default, handler: { _ in
+            self.viewModel.loadGames(page: 1)
+        }))
+        present(alert, animated: true, completion: nil)
+    }
+    
 }
+
 // MARK: - GameViewModelDelegate
 extension HomeViewController: GameViewModelDelegate {
-    
-    func showLoadingView() {
-        
-    }
-    
-    func hideLoadingView() {
-        
-    }
     
     func reloadData() {
         configurePageVC()
     }
+    
+    func showError() {
+        showErrorAlert()
+    }
+    
+}
+
+// MARK: - UICollectionViewDelegate
+extension HomeViewController: UICollectionViewDelegate {
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard let selectedGame = viewModel.games?[indexPath.row] else { return }
+        // TODO: - Send game to detailvc
+    }
+    
+}
+
+// MARK: - UICollectionViewDataSource
+extension HomeViewController: UICollectionViewDataSource {
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        viewModel.games?.count ?? 0
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: GamesCell.identifier, for: indexPath) as? GamesCell else {
+            return UICollectionViewCell()
+        }
+        // TODO: - Cell configuration
+        return cell
+    }
+    
+}
+
+// MARK: - UICollectionViewDelegateFlowLayout
+extension HomeViewController: UICollectionViewDelegateFlowLayout {
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let screenWidth = UIScreen.main.bounds.width - 32
+        return CGSize(width: screenWidth, height: 128)
+    }
+    
 }
