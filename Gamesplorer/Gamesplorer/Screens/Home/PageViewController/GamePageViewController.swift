@@ -1,3 +1,10 @@
+//
+//  GamePageViewController.swift
+//  Gamesplorer
+//
+//  Created by Mert Ozseven on 24.05.2024.
+//
+
 import UIKit
 
 final class GamePageViewController: UIPageViewController {
@@ -8,7 +15,7 @@ final class GamePageViewController: UIPageViewController {
     private var timer: Timer?
     private var currentIndex: Int = 0
 
-    // MARK: - Inits
+    // MARK: - Initialization
     init(viewModel: GameViewModel) {
         self.viewModel = viewModel
         super.init(transitionStyle: .scroll, navigationOrientation: .horizontal, options: nil)
@@ -24,16 +31,11 @@ final class GamePageViewController: UIPageViewController {
         timer?.invalidate()
     }
 
-    // MARK: - Lifecycle
+    // MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
         setupViewControllers()
         startTimer()
-    }
-
-    override func viewDidDisappear(_ animated: Bool) {
-        super.viewDidDisappear(animated)
-        timer?.invalidate()
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -41,27 +43,36 @@ final class GamePageViewController: UIPageViewController {
         startTimer()
     }
 
-    // MARK: - Private Methods
-    private func setupViewControllers() {
-        let games = viewModel.games?.shuffled().prefix(5)
-        viewControllersList = games.map { game in
-            let viewController = PagePreviewViewController(game: game)
-            return viewController
-        } as! [UIViewController]
-        
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        stopTimer()
+    }
+
+    // MARK: - Configuration of View Controllers
+    func setupViewControllers() {
+        guard let games = viewModel.games, !games.isEmpty else { return }
+        let shuffledGames = games.shuffled().prefix(5)
+        viewControllersList = shuffledGames.map { PagePreviewViewController(game: $0) }
+
         if let firstVC = viewControllersList.first {
             setViewControllers([firstVC], direction: .forward, animated: true, completion: nil)
         }
     }
 
+    // MARK: - Private Methods
     private func startTimer() {
-        timer?.invalidate()
+        timer?.invalidate()  // Invalidate any existing timer
         timer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(moveToNextPage), userInfo: nil, repeats: true)
     }
 
-    // MARK: - Objective
+    private func stopTimer() {
+        timer?.invalidate()
+        timer = nil
+    }
+
+    // MARK: - Objective Methods
     @objc private func moveToNextPage() {
-        guard !viewControllersList.isEmpty else { return }
+        guard !viewControllersList.isEmpty, timer != nil else { return }
         let nextIndex = (currentIndex + 1) % viewControllersList.count
         let direction: UIPageViewController.NavigationDirection = nextIndex < currentIndex ? .reverse : .forward
         let nextVC = viewControllersList[nextIndex]
@@ -71,9 +82,12 @@ final class GamePageViewController: UIPageViewController {
             }
         }
     }
+
 }
 
-extension GamePageViewController: UIPageViewControllerDataSource, UIPageViewControllerDelegate {
+// MARK: - UIPageViewControllerDataSource Methods
+extension GamePageViewController: UIPageViewControllerDataSource {
+    
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
         guard let index = viewControllersList.firstIndex(of: viewController), index > 0 else {
             return nil
@@ -87,4 +101,19 @@ extension GamePageViewController: UIPageViewControllerDataSource, UIPageViewCont
         }
         return viewControllersList[index + 1]
     }
+    
+}
+
+// MARK: - UIPageViewControllerDelegate Methods
+extension GamePageViewController: UIPageViewControllerDelegate {
+    
+    func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
+        if completed {
+            stopTimer()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 8) { [weak self] in
+                self?.startTimer()
+            }
+        }
+    }
+    
 }

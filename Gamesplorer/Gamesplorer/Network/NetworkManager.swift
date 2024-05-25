@@ -1,14 +1,6 @@
-//
-//  NetworkManager.swift
-//  Gamesplorer
-//
-//  Created by Mert Ozseven on 24.05.2024.
-//
-
 import Foundation
 
 enum NetworkError: Error {
-    
     case invalidRequest
     case requestFailed
     case jsonDecodedError
@@ -26,13 +18,12 @@ enum NetworkError: Error {
             return error.localizedDescription
         }
     }
-    
 }
 
 protocol NetworkService {
     func execute<T: Decodable>(
         urlRequest: URLRequest,
-        completion: @escaping(Result<T, NetworkError>) -> Void
+        completion: @escaping (Result<T, NetworkError>) -> Void
     )
 }
 

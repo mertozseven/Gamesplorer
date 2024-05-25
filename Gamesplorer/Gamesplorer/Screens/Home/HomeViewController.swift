@@ -9,9 +9,14 @@ import UIKit
 
 final class HomeViewController: UIViewController {
     
-    // MARK: - UI Components
-    private let topView = GPTopView()
+    // MARK: - Properties
+    private var viewModel: GameViewModel!
+    private let collectionViewHeight: CGFloat = 20 * 88
     
+    // MARK: - UI Components
+    private let scrollView = UIScrollView()
+    private let contentView = UIView()
+    private let topView = GPTopView()
     private var pageViewController: GamePageViewController!
     
     private lazy var gamesListCollectionView: UICollectionView = {
@@ -24,20 +29,18 @@ final class HomeViewController: UIViewController {
         collectionView.isScrollEnabled = false
         collectionView.dataSource = self
         collectionView.delegate = self
-        collectionView.backgroundColor = .clear
+        collectionView.backgroundColor = .secondarySystemBackground
         collectionView.isUserInteractionEnabled = true
+        collectionView.layer.cornerRadius = 10
         
         return collectionView
     }()
     
-    // MARK: - Properties
-    private var viewModel: GameViewModel!
-    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        viewModel.loadGames(page: 1)
         configureView()
-        viewModel.loadGames(page: 2)
     }
     
     // MARK: - Inits
@@ -53,42 +56,78 @@ final class HomeViewController: UIViewController {
     
     // MARK: - Private Methods
     private func configureView() {
-        addViews()
-        configureLayout()
-        reloadData()
         view.backgroundColor = .systemBackground
         navigationController?.setNavigationBarHidden(true, animated: false)
+        
+        addViews()
+        configurePageVC()
+        configureLayout()
+        reloadGameData()
     }
     
     private func addViews() {
-        view.addSubview(topView)
+        view.addSubview(scrollView)
+        scrollView.addSubview(contentView)
+        contentView.addSubview(topView)
+        contentView.addSubview(gamesListCollectionView)
     }
     
     private func configureLayout() {
-        topView.setupAnchors(
-            top: view.safeAreaLayoutGuide.topAnchor,
-            paddingTop: 16,
+        scrollView.setupAnchors(
+            top: view.topAnchor,
+            bottom: view.bottomAnchor,
             leading: view.leadingAnchor,
+            trailing: view.trailingAnchor
+        )
+        
+        contentView.setupAnchors(
+            top: scrollView.topAnchor,
+            bottom: scrollView.bottomAnchor,
+            leading: scrollView.leadingAnchor,
+            trailing: scrollView.trailingAnchor
+        )
+        contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor).isActive = true
+        contentView.heightAnchor.constraint(greaterThanOrEqualTo: scrollView.heightAnchor).isActive = true
+        contentView.bottomAnchor.constraint(equalTo: gamesListCollectionView.bottomAnchor, constant: 16).isActive = true
+        
+        topView.setupAnchors(
+            top: contentView.topAnchor,
+            paddingTop: 16,
+            leading: contentView.leadingAnchor,
             paddingLeading: 16,
-            trailing: view.trailingAnchor,
+            trailing: contentView.trailingAnchor,
             paddingTrailing: 16,
             height: 68
+        )
+        
+        gamesListCollectionView.setupAnchors(
+            top: pageViewController.view.bottomAnchor,
+            paddingTop: 16,
+            leading: contentView.leadingAnchor,
+            paddingLeading: 16,
+            trailing: contentView.trailingAnchor,
+            paddingTrailing: 16,
+            height: collectionViewHeight
         )
     }
     
     private func configurePageVC() {
-        pageViewController = GamePageViewController(viewModel: viewModel)
-        addChild(pageViewController)
-        view.addSubview(pageViewController.view)
-        pageViewController.didMove(toParent: self)
-        
-        pageViewController.view.setupAnchors(
-            top: topView.bottomAnchor,
-            paddingTop: 16,
-            leading: view.leadingAnchor,
-            trailing: view.trailingAnchor,
-            height: 256
-        )
+        if pageViewController == nil {
+            pageViewController = GamePageViewController(viewModel: viewModel)
+            addChild(pageViewController)
+            contentView.addSubview(pageViewController.view)
+            pageViewController.didMove(toParent: self)
+
+            pageViewController.view.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                pageViewController.view.topAnchor.constraint(equalTo: topView.bottomAnchor, constant: 16),
+                pageViewController.view.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+                pageViewController.view.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+                pageViewController.view.heightAnchor.constraint(equalToConstant: 256)
+            ])
+        }
+
+        pageViewController.setupViewControllers()
     }
     
     private func showErrorAlert() {
@@ -98,30 +137,32 @@ final class HomeViewController: UIViewController {
         }))
         present(alert, animated: true, completion: nil)
     }
-    
 }
 
 // MARK: - GameViewModelDelegate
 extension HomeViewController: GameViewModelDelegate {
     
-    func reloadData() {
-        configurePageVC()
+    func reloadGameData() {
+        DispatchQueue.main.async {
+            self.configurePageVC()
+            self.gamesListCollectionView.reloadData()
+        }
     }
     
     func showError() {
-        showErrorAlert()
+        DispatchQueue.main.async {
+            self.showErrorAlert()
+        }
     }
-    
 }
 
 // MARK: - UICollectionViewDelegate
 extension HomeViewController: UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        guard let selectedGame = viewModel.games?[indexPath.row] else { return }
+        guard let selectedGame = viewModel.game(at: indexPath) else { return }
         // TODO: - Send game to detailvc
     }
-    
 }
 
 // MARK: - UICollectionViewDataSource
@@ -135,10 +176,11 @@ extension HomeViewController: UICollectionViewDataSource {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: GamesCell.identifier, for: indexPath) as? GamesCell else {
             return UICollectionViewCell()
         }
-        // TODO: - Cell configuration
+        if let game = viewModel.game(at: indexPath) {
+            cell.configure(with: game)
+        }
         return cell
     }
-    
 }
 
 // MARK: - UICollectionViewDelegateFlowLayout
@@ -146,7 +188,14 @@ extension HomeViewController: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         let screenWidth = UIScreen.main.bounds.width - 32
-        return CGSize(width: screenWidth, height: 128)
+        return CGSize(width: screenWidth, height: 88)
     }
     
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        if offsetY > contentHeight - scrollView.frame.height - 100 {
+            viewModel.loadMoreGames()
+        }
+    }
 }

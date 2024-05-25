@@ -14,11 +14,20 @@ enum RequestMethod: String {
 
 enum Router {
     case games(page: Int)
+    case search(query: String, page: Int)
+    case genres
+    case gameDetails(id: Int)
     
     var path: String {
         switch self {
         case .games(let page):
             return "games?page=\(page)"
+        case .search(let query, let page):
+            return "games?page=\(page)&search=\(query)"
+        case .genres:
+            return "genres"
+        case .gameDetails(let id):
+            return "games/\(id)"
         }
     }
 }
@@ -107,7 +116,5 @@ extension API {
         } else {
             completion(.failure(.invalidRequest))
         }
-        
-        
     }
 }

@@ -8,22 +8,34 @@
 import Foundation
 
 protocol GameViewModelDelegate: AnyObject {
-    func reloadData()
+    func reloadGameData()
     func showError()
 }
 
 protocol GameViewModelProtocol {
     var delegate: GameViewModelDelegate? { get set }
     func loadGames(page: Int)
+    func loadMoreGames()
     func game(at index: IndexPath) -> Game?
+    func searchGames(query: String, page: Int)
+    func loadMoreSearchResults()
+    func searchResult(at index: IndexPath) -> Game?
+    func loadGameDetails(id: Int, completion: @escaping (Game?) -> Void)
 }
 
-final class GameViewModel {
+final class GameViewModel: GameViewModelProtocol {
     
     let service: GameServiceProtocol
     private(set) var games: [Game]? = []
+    private var currentPage: Int = 1
+    private var isFetching: Bool = false
+    private var hasMoreGames: Bool = true
     
-    private var nextPageURL: String?
+    private(set) var searchResults: [Game]? = []
+    private var searchCurrentPage: Int = 1
+    private var isSearching: Bool = false
+    private var hasMoreSearchResults: Bool = true
+    
     weak var delegate: GameViewModelDelegate?
     
     init(service: GameServiceProtocol = API.shared) {
@@ -31,8 +43,11 @@ final class GameViewModel {
     }
     
     fileprivate func fetchGames(page: Int = 1) {
+        guard !isFetching && hasMoreGames else { return }
+        isFetching = true
         service.fetchGames(page: page) { [weak self] result in
             guard let self = self else { return }
+            self.isFetching = false
             switch result {
             case .success(let gameResponse):
                 if page == 1 {
@@ -40,9 +55,10 @@ final class GameViewModel {
                 } else {
                     self.games?.append(contentsOf: gameResponse.results)
                 }
-                self.nextPageURL = gameResponse.next
+                self.hasMoreGames = gameResponse.next != nil
+                self.currentPage = page
                 DispatchQueue.main.async {
-                    self.delegate?.reloadData()
+                    self.delegate?.reloadGameData()
                 }
             case .failure(let error):
                 print(error.localizedDescription)
@@ -53,17 +69,68 @@ final class GameViewModel {
         }
     }
     
-}
-
-extension GameViewModel: GameViewModelProtocol {
+    fileprivate func fetchSearchResults(query: String, page: Int = 1) {
+        guard !isSearching && hasMoreSearchResults else { return }
+        isSearching = true
+        service.searchGames(query: query, page: page) { [weak self] result in
+            guard let self = self else { return }
+            self.isSearching = false
+            switch result {
+            case .success(let gameResponse):
+                if page == 1 {
+                    self.searchResults = gameResponse.results
+                } else {
+                    self.searchResults?.append(contentsOf: gameResponse.results)
+                }
+                self.hasMoreSearchResults = gameResponse.next != nil
+                self.searchCurrentPage = page
+                DispatchQueue.main.async {
+                    self.delegate?.reloadGameData()
+                }
+            case .failure(let error):
+                print(error.localizedDescription)
+                DispatchQueue.main.async {
+                    self.delegate?.showError()
+                }
+            }
+        }
+    }
     
     func loadGames(page: Int = 1) {
         fetchGames(page: page)
     }
     
-    func game(at index: IndexPath) -> Game? {
-        guard index.row < games.count else { return nil }
-        return games[index.row]
+    func loadMoreGames() {
+        fetchGames(page: currentPage + 1)
     }
     
+    func game(at index: IndexPath) -> Game? {
+        guard index.row < games?.count ?? 0 else { return nil }
+        return games?[index.row]
+    }
+    
+    func searchGames(query: String, page: Int = 1) {
+        fetchSearchResults(query: query, page: page)
+    }
+    
+    func loadMoreSearchResults() {
+        fetchSearchResults(query: "", page: searchCurrentPage + 1)
+    }
+    
+    func searchResult(at index: IndexPath) -> Game? {
+        guard index.row < searchResults?.count ?? 0 else { return nil }
+        return searchResults?[index.row]
+    }
+    
+    func loadGameDetails(id: Int, completion: @escaping (Game?) -> Void) {
+        service.fetchGameDetails(id: id) { result in
+            switch result {
+            case .success(let game):
+                completion(game)
+            case .failure(let error):
+                print(error.localizedDescription)
+                completion(nil)
+            }
+        }
+    }
 }

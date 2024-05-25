@@ -1,3 +1,10 @@
+//
+//  PagePreviewViewController.swift
+//  Gamesplorer
+//
+//  Created by Mert Ozseven on 24.05.2024.
+//
+
 import UIKit
 import Kingfisher
 
@@ -29,6 +36,16 @@ final class PagePreviewViewController: UIViewController {
         textAlignment: .left,
         textColor: .white,
         font: .systemFont(ofSize: 21, weight: .bold)
+    )
+    
+    private let releaseDate = GPLabel(
+        text: "",
+        textAlignment: .center,
+        textColor: .systemBlue,
+        font: .preferredFont(forTextStyle: .headline),
+        backgroundColor: .systemGray5,
+        clipsToBounds: true,
+        cornerRadius: 12
     )
     
     private let gradientLayer = CAGradientLayer()
@@ -70,6 +87,11 @@ final class PagePreviewViewController: UIViewController {
         configureLayout()
         gameTitle.text = game.name
         metacriticScore.text = "\(game.metacritic ?? 0)"
+        if let releaseDateString = game.released {
+            releaseDate.text = releaseDateString.formattedDate()
+        } else {
+            releaseDate.text = "Unknown"
+        }
     }
     
     private func addViews() {
@@ -78,6 +100,7 @@ final class PagePreviewViewController: UIViewController {
         imageView.addSubview(gameTitle)
         imageView.addSubview(metacriticLogo)
         imageView.addSubview(metacriticScore)
+        imageView.addSubview(releaseDate)
     }
     
     private func configureLayout() {
@@ -85,23 +108,24 @@ final class PagePreviewViewController: UIViewController {
             top: view.topAnchor,
             bottom: view.bottomAnchor,
             leading: view.leadingAnchor,
-            paddingLeading: 8,
+            paddingLeading: 16,
             trailing: view.trailingAnchor,
-            paddingTrailing: 8
+            paddingTrailing: 16
         )
         gameTitle.setupAnchors(
             bottom: imageView.bottomAnchor,
             paddingBottom: 8,
             leading: imageView.leadingAnchor,
             paddingLeading: 16,
-            trailing: metacriticLogo.leadingAnchor,
+            trailing: releaseDate.leadingAnchor,
             paddingTrailing: 8,
-            height: 80
+            height: 88
         )
         metacriticLogo.setupAnchors(
+            bottom: releaseDate.topAnchor,
+            paddingBottom: 16,
             trailing: metacriticScore.leadingAnchor,
             paddingTrailing: 8,
-            centerY: gameTitle.centerYAnchor,
             width: 24,
             height: 24
         )
@@ -111,6 +135,13 @@ final class PagePreviewViewController: UIViewController {
             centerY: metacriticLogo.centerYAnchor,
             width: 32,
             height: 22
+        )
+        releaseDate.setupAnchors(
+            trailing: imageView.trailingAnchor,
+            paddingTrailing: 16,
+            centerY: gameTitle.centerYAnchor,
+            width: 160,
+            height: 24
         )
     }
     
@@ -137,6 +168,7 @@ final class PagePreviewViewController: UIViewController {
     private func setupGradient() {
         gradientLayer.colors = [
             UIColor.clear.cgColor,
+            UIColor.black.cgColor,
             UIColor.black.cgColor
         ]
         gradientLayer.locations = [0.0, 1.0]

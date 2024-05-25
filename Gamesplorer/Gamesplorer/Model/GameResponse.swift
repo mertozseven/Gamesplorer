@@ -2,7 +2,7 @@
 //  GameResponse.swift
 //  Gamesplorer
 //
-//  Created by Mert Ozseven on 20.05.2024.
+//  Created by Mert Ozseven on 18.05.2024.
 //
 
 import Foundation
@@ -23,22 +23,16 @@ struct Game: Decodable {
     let metacritic: Int?
     let parent_platforms: [ParentPlatform]
     let tags: [Tag]
+    let genres: [Genre]
 }
 
-struct Rating: Decodable {
-    let id: Int
-    let title: String
-    let count: Int
-    let percent: Double
+struct ParentPlatform: Decodable {
+    let platform: Platform
 }
 
 struct Platform: Decodable {
     let id: Int
     let name: String
-}
-
-struct ParentPlatform: Decodable {
-    let platform: Platform
 }
 
 struct Tag: Decodable {
@@ -48,3 +42,4 @@ struct Tag: Decodable {
     let games_count: Int
     let image_background: String
 }
+
