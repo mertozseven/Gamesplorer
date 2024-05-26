@@ -40,7 +40,7 @@ final class HomeViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        viewModel.loadGames(page: 2)
+        viewModel.loadGames(page: 5)
         configureView()
     }
     
@@ -129,6 +129,7 @@ final class HomeViewController: UIViewController {
                 pageViewController.view.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
                 pageViewController.view.heightAnchor.constraint(equalToConstant: 256)
             ])
+            pageViewController.pageDelegate = self
         }
         
         pageViewController.setupViewControllers()
@@ -137,7 +138,7 @@ final class HomeViewController: UIViewController {
     private func showErrorAlert() {
         let alert = UIAlertController(title: "Error", message: "Please try again", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Reload", style: .default, handler: { _ in
-            self.viewModel.loadGames(page: 2)
+            self.viewModel.loadGames(page: 5)
         }))
         present(alert, animated: true, completion: nil)
     }
@@ -203,5 +204,14 @@ extension HomeViewController: UICollectionViewDelegateFlowLayout {
         if offsetY > contentHeight - scrollView.frame.height - 100 {
             viewModel.loadMoreGames()
         }
+    }
+}
+
+// MARK: - GamePageViewControllerDelegate
+extension HomeViewController: GamePageViewControllerDelegate {
+    func didSelectGame(_ game: Game) {
+        let detailViewModel = GameDetailViewModel(service: API.shared)
+        let detailVC = DetailViewController(gameID: game.id ?? 3482, viewModel: detailViewModel, screenshots: game.short_screenshots)
+        navigationController?.pushViewController(detailVC, animated: true)
     }
 }

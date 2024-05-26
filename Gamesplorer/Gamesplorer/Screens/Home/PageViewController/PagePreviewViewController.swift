@@ -8,7 +8,15 @@
 import UIKit
 import Kingfisher
 
+protocol PagePreviewViewControllerDelegate: AnyObject {
+    func didSelectGame(_ game: Game)
+}
+
 final class PagePreviewViewController: UIViewController {
+    
+    // MARK: - Properties
+    private var game: Game
+    weak var delegate: PagePreviewViewControllerDelegate?
     
     // MARK: - UI Components
     private let imageView = GPImageView(
@@ -22,7 +30,8 @@ final class PagePreviewViewController: UIViewController {
         textAlignment: .left,
         textColor: .white,
         font: .systemFont(ofSize: 21, weight: .bold),
-        numberOfLines: 0
+        numberOfLines: 0,
+        adjustsFontSizeToFitWidth: true
     )
     
     private let metacriticLogo = GPImageView(
@@ -50,13 +59,12 @@ final class PagePreviewViewController: UIViewController {
     
     private let gradientLayer = CAGradientLayer()
     
-    // MARK: - Properties
-    private var game: Game
-    
     // MARK: - Inits
-    init(game: Game) {
+    init(game: Game, delegate: PagePreviewViewControllerDelegate) {
         self.game = game
+        self.delegate = delegate
         super.init(nibName: nil, bundle: nil)
+        configureGesture()
     }
     
     required init?(coder: NSCoder) {
@@ -156,4 +164,12 @@ final class PagePreviewViewController: UIViewController {
         gradientLayer.endPoint = CGPoint(x: 0.5, y: 1.0)
     }
     
+    private func configureGesture() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        view.addGestureRecognizer(tapGesture)
+    }
+    
+    @objc private func handleTap() {
+        delegate?.didSelectGame(game)
+    }
 }

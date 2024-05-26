@@ -15,6 +15,13 @@ class DetailViewController: UIViewController {
     private var gameID: Int
     private var isExpanded = false
     
+    private var isFavorite: Bool = false {
+        didSet {
+            let imageName = isFavorite ? "star.fill" : "star"
+            saveButton.setImage(UIImage(systemName: imageName), for: .normal)
+        }
+    }
+    
     // MARK: - UI Components
     private let scrollView: UIScrollView = {
         let scrollView = UIScrollView()
@@ -28,6 +35,16 @@ class DetailViewController: UIViewController {
     private let backButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(systemName: "chevron.left"), for: .normal)
+        button.tintColor = .label
+        button.backgroundColor = .secondarySystemBackground
+        button.layer.cornerRadius = 14
+        
+        return button
+    }()
+    
+    private let saveButton: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(systemName: "star"), for: .normal)
         button.tintColor = .label
         button.backgroundColor = .secondarySystemBackground
         button.layer.cornerRadius = 14
@@ -64,10 +81,55 @@ class DetailViewController: UIViewController {
         adjustsFontSizeToFitWidth: true
     )
     
-    private let separatorView: UIView = {
+    private let topSeparatorView: UIView = {
         let view = UIView()
         view.backgroundColor = .systemGray5
         view.layer.cornerRadius = 0.5
+        return view
+    }()
+    
+    private let metacriticTitle = GPLabel(
+        text: "Metacritic",
+        textAlignment: .center,
+        textColor: .tertiaryLabel,
+        font: .systemFont(ofSize: 16, weight: .heavy),
+        adjustsFontSizeToFitWidth: true
+    )
+    
+    private let metacriticScore = GPLabel(
+        text: "",
+        textAlignment: .center,
+        textColor: .secondaryLabel,
+        font: .systemFont(ofSize: 18, weight: .heavy)
+    )
+    
+    private let verticalSeparatorView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .systemGray5
+        view.layer.cornerRadius = 0.5
+        return view
+    }()
+    
+    private let releaseDateTitle = GPLabel(
+        text: "Release Date",
+        textAlignment: .center,
+        textColor: .tertiaryLabel,
+        font: .systemFont(ofSize: 16, weight: .heavy)
+    )
+    
+    private let releaseDate = GPLabel(
+        text: "",
+        textAlignment: .center,
+        textColor: .secondaryLabel,
+        font: .systemFont(ofSize: 18, weight: .heavy),
+        adjustsFontSizeToFitWidth: true
+    )
+    
+    private let bodySeparatorView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .systemGray5
+        view.layer.cornerRadius = 0.5
+        
         return view
     }()
     
@@ -98,7 +160,7 @@ class DetailViewController: UIViewController {
         return stackView
     }()
     
-    private let separator2View: UIView = {
+    private let previewSeparatorView: UIView = {
         let view = UIView()
         view.backgroundColor = .systemGray5
         view.layer.cornerRadius = 0.5
@@ -129,14 +191,6 @@ class DetailViewController: UIViewController {
         collectionView.isUserInteractionEnabled = true
         
         return collectionView
-    }()
-    
-    private let separator3View: UIView = {
-        let view = UIView()
-        view.backgroundColor = .systemGray5
-        view.layer.cornerRadius = 0.5
-        
-        return view
     }()
     
     // MARK: - Lifecycle
@@ -170,6 +224,8 @@ class DetailViewController: UIViewController {
         configureLayout()
         configureBackButton()
         configureSeeMoreButton()
+        checkFavoriteStatus()
+        configureSaveButton()
         view.backgroundColor = .systemBackground
     }
     
@@ -178,15 +234,21 @@ class DetailViewController: UIViewController {
         scrollView.addSubview(contentView)
         contentView.addSubview(backgroundImageView)
         view.addSubview(backButton)
+        view.addSubview(saveButton)
         contentView.addSubview(gameImageView)
         contentView.addSubview(gameTitle)
         contentView.addSubview(developersTitle)
-        contentView.addSubview(separatorView)
+        contentView.addSubview(topSeparatorView)
         contentView.addSubview(descriptionStackView)
-        contentView.addSubview(separator2View)
+        contentView.addSubview(previewSeparatorView)
         contentView.addSubview(previewTitle)
         contentView.addSubview(gamesListCollectionView)
-        contentView.addSubview(separator3View)
+        contentView.addSubview(bodySeparatorView)
+        contentView.addSubview(metacriticTitle)
+        contentView.addSubview(metacriticScore)
+        contentView.addSubview(verticalSeparatorView)
+        contentView.addSubview(releaseDateTitle)
+        contentView.addSubview(releaseDate)
     }
     
     private func configureLayout() {
@@ -196,7 +258,6 @@ class DetailViewController: UIViewController {
             leading: view.leadingAnchor,
             trailing: view.trailingAnchor
         )
-        
         contentView.setupAnchors(
             top: scrollView.topAnchor,
             bottom: scrollView.bottomAnchor,
@@ -221,6 +282,14 @@ class DetailViewController: UIViewController {
             width: 28,
             height: 28
         )
+        saveButton.setupAnchors(
+            top: view.safeAreaLayoutGuide.topAnchor,
+            paddingTop: 8,
+            trailing: view.trailingAnchor,
+            paddingTrailing: 8,
+            width: 28,
+            height: 28
+        )
         gameImageView.setupAnchors(
             top: backgroundImageView.bottomAnchor,
             paddingTop: 16,
@@ -231,6 +300,7 @@ class DetailViewController: UIViewController {
         )
         gameTitle.setupAnchors(
             top: gameImageView.topAnchor,
+            paddingTop: -4,
             leading: gameImageView.trailingAnchor,
             paddingLeading: 16,
             trailing: contentView.trailingAnchor,
@@ -241,24 +311,66 @@ class DetailViewController: UIViewController {
             top: gameTitle.bottomAnchor,
             leading: gameTitle.leadingAnchor,
             trailing: gameTitle.trailingAnchor,
-            height: 16
+            height: 34
         )
-        separatorView.setupAnchors(
+        topSeparatorView.setupAnchors(
             top: gameImageView.bottomAnchor,
             paddingTop: 16,
             leading: gameImageView.leadingAnchor,
             trailing: contentView.trailingAnchor,
             height: 1
         )
+        metacriticTitle.setupAnchors(
+            top: topSeparatorView.bottomAnchor,
+            paddingTop: 16,
+            leading: contentView.leadingAnchor,
+            trailing: verticalSeparatorView.leadingAnchor,
+            height: 18
+        )
+        metacriticScore.setupAnchors(
+            top: metacriticTitle.bottomAnchor,
+            paddingTop: 8,
+            leading: metacriticTitle.leadingAnchor,
+            trailing: metacriticTitle.trailingAnchor,
+            height: 20
+        )
+        verticalSeparatorView.setupAnchors(
+            top: metacriticTitle.topAnchor,
+            bottom: metacriticScore.bottomAnchor,
+            centerX: contentView.centerXAnchor,
+            width: 1
+        )
+        releaseDateTitle.setupAnchors(
+            top: topSeparatorView.bottomAnchor,
+            paddingTop: 16,
+            leading: verticalSeparatorView.trailingAnchor,
+            trailing: contentView.trailingAnchor,
+            height: 18
+        )
+        releaseDate.setupAnchors(
+            top: releaseDateTitle.bottomAnchor,
+            paddingTop: 8,
+            leading: releaseDateTitle.leadingAnchor,
+            trailing: releaseDateTitle.trailingAnchor,
+            height: 20
+        )
+        bodySeparatorView.setupAnchors(
+            top: metacriticScore.bottomAnchor,
+            paddingTop: 16,
+            leading: descriptionStackView.leadingAnchor,
+            trailing: descriptionStackView.trailingAnchor,
+            height: 1
+        )
+        
         descriptionStackView.setupAnchors(
-            top: separatorView.bottomAnchor,
+            top: bodySeparatorView.bottomAnchor,
             paddingTop: 16,
             leading: contentView.leadingAnchor,
             paddingLeading: 16,
             trailing: contentView.trailingAnchor,
             paddingTrailing: 16
         )
-        separator2View.setupAnchors(
+        previewSeparatorView.setupAnchors(
             top: descriptionStackView.bottomAnchor,
             paddingTop: 16,
             leading: descriptionStackView.leadingAnchor,
@@ -266,7 +378,7 @@ class DetailViewController: UIViewController {
             height: 1
         )
         previewTitle.setupAnchors(
-            top: separator2View.bottomAnchor,
+            top: previewSeparatorView.bottomAnchor,
             paddingTop: 16,
             leading: contentView.leadingAnchor,
             paddingLeading: 16,
@@ -280,17 +392,27 @@ class DetailViewController: UIViewController {
             trailing: contentView.trailingAnchor,
             height: 174
         )
-        separator3View.setupAnchors(
-            top: gamesListCollectionView.bottomAnchor,
-            paddingTop: 16,
-            leading: descriptionStackView.leadingAnchor,
-            trailing: descriptionStackView.trailingAnchor,
-            height: 1
-        )
     }
     
     private func configureBackButton() {
         backButton.addTarget(self, action: #selector(backButtonAction), for: .touchUpInside)
+    }
+    
+    private func configureSaveButton() {
+        saveButton.addTarget(self, action: #selector(toggleFavorite), for: .touchUpInside)
+    }
+    
+    private func checkFavoriteStatus() {
+        isFavorite = UserDefaults.standard.bool(forKey: "favorite_\(gameID)")
+    }
+    
+    private func updateFavorites() {
+        let key = "favorite_\(gameID)"
+        if isFavorite {
+            UserDefaults.standard.set(true, forKey: key)
+        } else {
+            UserDefaults.standard.removeObject(forKey: key)
+        }
     }
     
     private func showErrorAlert() {
@@ -310,6 +432,12 @@ class DetailViewController: UIViewController {
             let developers = gameDetail.developers?.first?.name ?? "N/A"
             self.developersTitle.text = "Developer: \(developers)"
             self.descriptionBody.text = gameDetail.descriptionRaw
+            self.metacriticScore.text = "\(gameDetail.metacritic ?? 0)"
+            if let releaseDateString = gameDetail.released {
+                self.releaseDate.text = releaseDateString.formattedDate()
+            } else {
+                self.releaseDate.text = "Unknown"
+            }
         }
     }
     
@@ -331,10 +459,20 @@ class DetailViewController: UIViewController {
             self.view.layoutIfNeeded()
         }
     }
+    
+    @objc private func toggleFavorite() {
+        isFavorite.toggle()
+        updateFavorites()
+        detailViewModel.toggleFavorite()
+    }
 }
 
 // MARK: - GameDetailViewModelDelegate
 extension DetailViewController: GameDetailViewModelDelegate {
+    
+    func didUpdateFavorites(_ isFavorited: Bool) {
+        isFavorite = isFavorited
+    }
     
     func didUpdateGameDetail() {
         configureData()
@@ -361,4 +499,5 @@ extension DetailViewController: UICollectionViewDataSource {
         cell.configure(with: screenshots[indexPath.row])
         return cell
     }
+    
 }

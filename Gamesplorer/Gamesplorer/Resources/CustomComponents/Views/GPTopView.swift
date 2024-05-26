@@ -25,10 +25,9 @@ class GPTopView: UIView {
     )
     
     private let searchButton = GPImageView(
-        image: UIImage(systemName: "magnifyingglass.circle.fill")?.resized(to: CGSize(width: 40, height: 40)),
+        image: UIImage(systemName: "magnifyingglass.circle")?.withTintColor(.systemBlue).resized(to: CGSize(width: 40, height: 40)),
         contentMode: .scaleAspectFit,
-        clipsToBounds: true,
-        tintColor: .label
+        clipsToBounds: true
     )
     
     // MARK: - Initializers
@@ -69,7 +68,6 @@ class GPTopView: UIView {
         dateLabel.translatesAutoresizingMaskIntoConstraints = false
         searchButton.translatesAutoresizingMaskIntoConstraints = false
         
-        // Setting the height constraints with a lower priority
         let titleLabelHeightConstraint = titleLabel.heightAnchor.constraint(equalToConstant: 34)
         titleLabelHeightConstraint.priority = UILayoutPriority(999)
         titleLabelHeightConstraint.isActive = true
@@ -94,6 +92,7 @@ class GPTopView: UIView {
             searchButton.heightAnchor.constraint(equalToConstant: 40)
         ])
     }
+
 }
 
 #Preview {

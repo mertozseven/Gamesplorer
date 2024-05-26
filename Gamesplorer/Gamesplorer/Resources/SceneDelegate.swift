@@ -26,7 +26,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let homeVC = UINavigationController(rootViewController: HomeViewController(viewModel: GameViewModel(service: API.shared)))
         homeVC.tabBarItem = UITabBarItem(title: "Home", image: UIImage(systemName: "house"), tag: 0)
         
-        let favoritesVC = UINavigationController(rootViewController: FavoritesViewController())
+        let favoritesVC = UINavigationController(rootViewController: FavoritesViewController(viewModel: [GameDetailViewModel()]))
         favoritesVC.tabBarItem = UITabBarItem(title: "Favorites", image: UIImage(systemName: "star.fill"), tag: 1)
         
         tabBarController.viewControllers = [homeVC, favoritesVC]

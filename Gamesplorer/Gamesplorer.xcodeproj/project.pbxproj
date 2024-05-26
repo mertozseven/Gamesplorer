@@ -31,6 +31,7 @@
 		96B74D272BF94C040035A883 /* UIColor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96B74D262BF94C040035A883 /* UIColor.swift */; };
 		96B74D292BF94CDD0035A883 /* GPImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96B74D282BF94CDD0035A883 /* GPImageView.swift */; };
 		96B74D2B2BF9569A0035A883 /* FavoritesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96B74D2A2BF9569A0035A883 /* FavoritesViewController.swift */; };
+		96DC3FDB2C03A67600C97ED3 /* UserDefaultsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96DC3FDA2C03A67600C97ED3 /* UserDefaultsManager.swift */; };
 		96E096B92C00BA7100994448 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E096B82C00BA7100994448 /* NetworkManager.swift */; };
 		96F358A22C00BAA300EFBABA /* GameService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F358A12C00BAA300EFBABA /* GameService.swift */; };
 		96F358AB2C00C05400EFBABA /* GamesCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F358AA2C00C05400EFBABA /* GamesCell.swift */; };
@@ -64,6 +65,7 @@
 		96B74D262BF94C040035A883 /* UIColor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIColor.swift; sourceTree = "<group>"; };
 		96B74D282BF94CDD0035A883 /* GPImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPImageView.swift; sourceTree = "<group>"; };
 		96B74D2A2BF9569A0035A883 /* FavoritesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesViewController.swift; sourceTree = "<group>"; };
+		96DC3FDA2C03A67600C97ED3 /* UserDefaultsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsManager.swift; sourceTree = "<group>"; };
 		96E096B82C00BA7100994448 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
 		96F358A12C00BAA300EFBABA /* GameService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameService.swift; sourceTree = "<group>"; };
 		96F358AA2C00C05400EFBABA /* GamesCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamesCell.swift; sourceTree = "<group>"; };
@@ -153,6 +155,7 @@
 				9631DD8F2BF92046001DD189 /* Assets.xcassets */,
 				9631DD8C2BF92045001DD189 /* Gamesplorer.xcdatamodeld */,
 				9631DD912BF92046001DD189 /* LaunchScreen.storyboard */,
+				96DC3FDA2C03A67600C97ED3 /* UserDefaultsManager.swift */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -370,6 +373,7 @@
 				96B74D292BF94CDD0035A883 /* GPImageView.swift in Sources */,
 				9613E0FF2BFBD4E3003EA9B8 /* Constants.swift in Sources */,
 				9613E1012BFBD76D003EA9B8 /* API.swift in Sources */,
+				96DC3FDB2C03A67600C97ED3 /* UserDefaultsManager.swift in Sources */,
 				9631DD842BF92045001DD189 /* AppDelegate.swift in Sources */,
 				9631DD862BF92045001DD189 /* SceneDelegate.swift in Sources */,
 				96F358AB2C00C05400EFBABA /* GamesCell.swift in Sources */,

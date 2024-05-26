@@ -7,6 +7,10 @@
 
 import UIKit
 
+protocol GamePageViewControllerDelegate: AnyObject {
+    func didSelectGame(_ game: Game)
+}
+
 final class GamePageViewController: UIPageViewController {
 
     // MARK: - Properties
@@ -14,6 +18,7 @@ final class GamePageViewController: UIPageViewController {
     private var viewControllersList: [UIViewController] = []
     private var timer: Timer?
     private var currentIndex: Int = 0
+    weak var pageDelegate: GamePageViewControllerDelegate?
 
     // MARK: - Initialization
     init(viewModel: GameViewModel) {
@@ -52,7 +57,7 @@ final class GamePageViewController: UIPageViewController {
     func setupViewControllers() {
         guard let games = viewModel.games, !games.isEmpty else { return }
         let shuffledGames = games.shuffled().prefix(5)
-        viewControllersList = shuffledGames.map { PagePreviewViewController(game: $0) }
+        viewControllersList = shuffledGames.map { PagePreviewViewController(game: $0, delegate: self) }
 
         if let firstVC = viewControllersList.first {
             setViewControllers([firstVC], direction: .forward, animated: true, completion: nil)
@@ -61,7 +66,7 @@ final class GamePageViewController: UIPageViewController {
 
     // MARK: - Private Methods
     private func startTimer() {
-        timer?.invalidate()  // Invalidate any existing timer
+        timer?.invalidate()
         timer = Timer.scheduledTimer(timeInterval: 3.0, target: self, selector: #selector(moveToNextPage), userInfo: nil, repeats: true)
     }
 
@@ -82,7 +87,6 @@ final class GamePageViewController: UIPageViewController {
             }
         }
     }
-
 }
 
 // MARK: - UIPageViewControllerDataSource Methods
@@ -101,7 +105,6 @@ extension GamePageViewController: UIPageViewControllerDataSource {
         }
         return viewControllersList[index + 1]
     }
-    
 }
 
 // MARK: - UIPageViewControllerDelegate Methods
@@ -116,4 +119,16 @@ extension GamePageViewController: UIPageViewControllerDelegate {
         }
     }
     
+    func pageViewController(_ pageViewController: UIPageViewController, willTransitionTo pendingViewControllers: [UIViewController]) {
+        if let pendingVC = pendingViewControllers.first as? PagePreviewViewController {
+            self.currentIndex = viewControllersList.firstIndex(of: pendingVC) ?? 0
+        }
+    }
+}
+
+// MARK: - PagePreviewViewControllerDelegate
+extension GamePageViewController: PagePreviewViewControllerDelegate {
+    func didSelectGame(_ game: Game) {
+        pageDelegate?.didSelectGame(game)
+    }
 }
