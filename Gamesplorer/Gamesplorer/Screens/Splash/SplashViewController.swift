@@ -34,6 +34,7 @@ class SplashViewController: UIViewController {
         textAlignment: .left,
         textColor: .label,
         font: .preferredFont(forTextStyle: .title2),
+        numberOfLines: 0,
         adjustsFontSizeToFitWidth: false
     )
     
@@ -172,7 +173,7 @@ class SplashViewController: UIViewController {
             leading: gamepadIcon.trailingAnchor,
             paddingLeading: 16,
             width: UIScreen.main.bounds.width / 2 + 40,
-            height: 40
+            height: 48
         )
         
         metacriticIcon.setupAnchors(
