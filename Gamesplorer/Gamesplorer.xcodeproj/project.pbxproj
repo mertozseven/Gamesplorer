@@ -32,6 +32,7 @@
 		96B74D292BF94CDD0035A883 /* GPImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96B74D282BF94CDD0035A883 /* GPImageView.swift */; };
 		96B74D2B2BF9569A0035A883 /* FavoritesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96B74D2A2BF9569A0035A883 /* FavoritesViewController.swift */; };
 		96DC3FDB2C03A67600C97ED3 /* UserDefaultsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96DC3FDA2C03A67600C97ED3 /* UserDefaultsManager.swift */; };
+		96DC3FDE2C03C8C300C97ED3 /* SplashViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96DC3FDD2C03C8C200C97ED3 /* SplashViewController.swift */; };
 		96E096B92C00BA7100994448 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E096B82C00BA7100994448 /* NetworkManager.swift */; };
 		96F358A22C00BAA300EFBABA /* GameService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F358A12C00BAA300EFBABA /* GameService.swift */; };
 		96F358AB2C00C05400EFBABA /* GamesCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F358AA2C00C05400EFBABA /* GamesCell.swift */; };
@@ -66,6 +67,7 @@
 		96B74D282BF94CDD0035A883 /* GPImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPImageView.swift; sourceTree = "<group>"; };
 		96B74D2A2BF9569A0035A883 /* FavoritesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesViewController.swift; sourceTree = "<group>"; };
 		96DC3FDA2C03A67600C97ED3 /* UserDefaultsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsManager.swift; sourceTree = "<group>"; };
+		96DC3FDD2C03C8C200C97ED3 /* SplashViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashViewController.swift; sourceTree = "<group>"; };
 		96E096B82C00BA7100994448 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
 		96F358A12C00BAA300EFBABA /* GameService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameService.swift; sourceTree = "<group>"; };
 		96F358AA2C00C05400EFBABA /* GamesCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamesCell.swift; sourceTree = "<group>"; };
@@ -220,9 +222,18 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		96DC3FDC2C03C8AA00C97ED3 /* Splash */ = {
+			isa = PBXGroup;
+			children = (
+				96DC3FDD2C03C8C200C97ED3 /* SplashViewController.swift */,
+			);
+			path = Splash;
+			sourceTree = "<group>";
+		};
 		96E096B52C00B6D100994448 /* Screens */ = {
 			isa = PBXGroup;
 			children = (
+				96DC3FDC2C03C8AA00C97ED3 /* Splash */,
 				96E096B62C00B71100994448 /* Home */,
 				96F358A52C00BC7000EFBABA /* Detail */,
 				96F358A42C00BC6A00EFBABA /* Favorites */,
@@ -369,6 +380,7 @@
 				96F358AE2C00C11500EFBABA /* GamePageViewController.swift in Sources */,
 				966F97E42C02703300DE4D04 /* DetailViewController.swift in Sources */,
 				96F358B12C00C17D00EFBABA /* PagePreviewViewController.swift in Sources */,
+				96DC3FDE2C03C8C300C97ED3 /* SplashViewController.swift in Sources */,
 				966F97E62C0276CB00DE4D04 /* GameDetailResponse.swift in Sources */,
 				96B74D292BF94CDD0035A883 /* GPImageView.swift in Sources */,
 				9613E0FF2BFBD4E3003EA9B8 /* Constants.swift in Sources */,

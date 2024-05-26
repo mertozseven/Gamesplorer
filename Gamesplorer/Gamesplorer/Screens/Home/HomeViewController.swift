@@ -40,6 +40,7 @@ final class HomeViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationController?.present(SplashViewController(), animated: true)
         viewModel.loadGames(page: 5)
         configureView()
     }

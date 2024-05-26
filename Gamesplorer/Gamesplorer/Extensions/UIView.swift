@@ -7,8 +7,6 @@
 
 import UIKit
 
-import UIKit
-
 extension UIView {
     
     // MARK: - Anchor Setup Method
