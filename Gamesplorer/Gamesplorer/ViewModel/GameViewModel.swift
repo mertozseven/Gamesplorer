@@ -20,7 +20,6 @@ protocol GameViewModelProtocol {
     func searchGames(query: String, page: Int)
     func loadMoreSearchResults()
     func searchResult(at index: IndexPath) -> Game?
-    func loadGameDetails(id: Int, completion: @escaping (Game?) -> Void)
 }
 
 final class GameViewModel: GameViewModelProtocol {
@@ -30,7 +29,6 @@ final class GameViewModel: GameViewModelProtocol {
     private var currentPage: Int = 1
     private var isFetching: Bool = false
     private var hasMoreGames: Bool = true
-    
     private(set) var searchResults: [Game]? = []
     private var searchCurrentPage: Int = 1
     private var isSearching: Bool = false
@@ -53,7 +51,7 @@ final class GameViewModel: GameViewModelProtocol {
                 if page == 1 {
                     self.games = gameResponse.results
                 } else {
-                    self.games?.append(contentsOf: gameResponse.results)
+                    self.games!.append(contentsOf: gameResponse.results!)
                 }
                 self.hasMoreGames = gameResponse.next != nil
                 self.currentPage = page
@@ -80,7 +78,7 @@ final class GameViewModel: GameViewModelProtocol {
                 if page == 1 {
                     self.searchResults = gameResponse.results
                 } else {
-                    self.searchResults?.append(contentsOf: gameResponse.results)
+                    self.searchResults?.append(contentsOf: gameResponse.results!)
                 }
                 self.hasMoreSearchResults = gameResponse.next != nil
                 self.searchCurrentPage = page
@@ -122,15 +120,4 @@ final class GameViewModel: GameViewModelProtocol {
         return searchResults?[index.row]
     }
     
-    func loadGameDetails(id: Int, completion: @escaping (Game?) -> Void) {
-        service.fetchGameDetails(id: id) { result in
-            switch result {
-            case .success(let game):
-                completion(game)
-            case .failure(let error):
-                print(error.localizedDescription)
-                completion(nil)
-            }
-        }
-    }
 }

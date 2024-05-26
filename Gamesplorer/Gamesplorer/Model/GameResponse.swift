@@ -8,38 +8,32 @@
 import Foundation
 
 struct GameResponse: Decodable {
-    let count: Int
+    let count: Int?
     let next: String?
     let previous: String?
-    let results: [Game]
+    let results: [Game]?
 }
 
 struct Game: Decodable {
-    let id: Int
-    let slug: String
-    let name: String
+    let id: Int?
+    let slug: String?
+    let name: String?
     let released: String?
     let background_image: String?
     let metacritic: Int?
     let parent_platforms: [ParentPlatform]
-    let tags: [Tag]
-    let genres: [Genre]
+    let tags: [Tag]?
+    let genres: [Genre]?
+    let short_screenshots: [Screenshots]
 }
 
 struct ParentPlatform: Decodable {
-    let platform: Platform
+    let platform: Platform?
 }
 
-struct Platform: Decodable {
-    let id: Int
-    let name: String
+struct Screenshots: Decodable {
+    let id: Int?
+    let image: String?
 }
 
-struct Tag: Decodable {
-    let id: Int
-    let name: String
-    let slug: String
-    let games_count: Int
-    let image_background: String
-}
 

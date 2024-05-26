@@ -1,3 +1,10 @@
+//
+//  NetworkManager.swift
+//  Gamesplorer
+//
+//  Created by Mert Ozseven on 24.05.2024.
+//
+
 import Foundation
 
 enum NetworkError: Error {
@@ -37,24 +44,28 @@ final class NetworkManager {
 
 extension NetworkManager: NetworkService {
     
-    func execute<T>(urlRequest: URLRequest, completion: @escaping (Result<T, NetworkError>) -> Void) where T : Decodable {
-        
+    func execute<T>(urlRequest: URLRequest, completion: @escaping (Result<T, NetworkError>) -> Void) where T: Decodable {
         let task = session.dataTask(with: urlRequest) { data, response, error in
-            
             if let error = error {
                 completion(.failure(.customError(error)))
             } else if let data = data {
                 do {
+                    // Log the raw JSON response
+                    if let jsonString = String(data: data, encoding: .utf8) {
+                        print("Raw JSON response: \(jsonString)")
+                    }
+                    
                     let responseObj = try JSONDecoder().decode(T.self, from: data)
                     completion(.success(responseObj))
                 } catch {
+                    print("JSON Decoding Error: \(error)")
                     completion(.failure(.jsonDecodedError))
                 }
             } else {
                 completion(.failure(.requestFailed))
             }
         }
-        
         task.resume()
     }
+    
 }

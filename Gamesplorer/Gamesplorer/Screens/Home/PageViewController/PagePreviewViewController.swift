@@ -67,7 +67,6 @@ final class PagePreviewViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         configureView()
-        loadImage()
         setupGradient()
     }
     
@@ -85,6 +84,7 @@ final class PagePreviewViewController: UIViewController {
     private func configureView() {
         addViews()
         configureLayout()
+        imageView.loadImage(from: game.background_image)
         gameTitle.text = game.name
         metacriticScore.text = "\(game.metacritic ?? 0)"
         if let releaseDateString = game.released {
@@ -144,26 +144,6 @@ final class PagePreviewViewController: UIViewController {
             height: 24
         )
     }
-    
-    private func loadImage() {
-        guard let url = URL(string: game.background_image ?? "") else { return }
-        
-        let downsampling = DownsamplingImageProcessor(size: imageView.bounds.size)
-        let processor = downsampling
-        
-        imageView.kf.indicatorType = .activity
-        imageView.kf.setImage(
-            with: url,
-            placeholder: UIImage(named: "placeholder"),
-            options: [
-                .processor(processor),
-                .scaleFactor(UIScreen.main.scale),
-                .transition(.fade(1)),
-                .cacheOriginalImage
-            ]
-        )
-    }
-    
     
     private func setupGradient() {
         gradientLayer.colors = [

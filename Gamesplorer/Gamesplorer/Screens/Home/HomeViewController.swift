@@ -11,6 +11,7 @@ final class HomeViewController: UIViewController {
     
     // MARK: - Properties
     private var viewModel: GameViewModel!
+    private var gameDetailViewModel: GameDetailViewModel?
     private let collectionViewHeight: CGFloat = 20 * 88
     
     // MARK: - UI Components
@@ -39,8 +40,13 @@ final class HomeViewController: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        viewModel.loadGames(page: 1)
+        viewModel.loadGames(page: 2)
         configureView()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: false)
     }
     
     // MARK: - Inits
@@ -57,8 +63,6 @@ final class HomeViewController: UIViewController {
     // MARK: - Private Methods
     private func configureView() {
         view.backgroundColor = .systemBackground
-        navigationController?.setNavigationBarHidden(true, animated: false)
-        
         addViews()
         configurePageVC()
         configureLayout()
@@ -117,7 +121,7 @@ final class HomeViewController: UIViewController {
             addChild(pageViewController)
             contentView.addSubview(pageViewController.view)
             pageViewController.didMove(toParent: self)
-
+            
             pageViewController.view.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
                 pageViewController.view.topAnchor.constraint(equalTo: topView.bottomAnchor, constant: 16),
@@ -126,14 +130,14 @@ final class HomeViewController: UIViewController {
                 pageViewController.view.heightAnchor.constraint(equalToConstant: 256)
             ])
         }
-
+        
         pageViewController.setupViewControllers()
     }
     
     private func showErrorAlert() {
         let alert = UIAlertController(title: "Error", message: "Please try again", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Reload", style: .default, handler: { _ in
-            self.viewModel.loadGames(page: 1)
+            self.viewModel.loadGames(page: 2)
         }))
         present(alert, animated: true, completion: nil)
     }
@@ -161,7 +165,9 @@ extension HomeViewController: UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let selectedGame = viewModel.game(at: indexPath) else { return }
-        // TODO: - Send game to detailvc
+        let detailViewModel = gameDetailViewModel ?? GameDetailViewModel(service: API.shared)
+        let detailVC = DetailViewController(gameID: selectedGame.id ?? 3482, viewModel: detailViewModel, screenshots: selectedGame.short_screenshots)
+        navigationController?.pushViewController(detailVC, animated: true)
     }
 }
 

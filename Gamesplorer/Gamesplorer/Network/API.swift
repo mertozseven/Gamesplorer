@@ -52,51 +52,58 @@ final class API {
 extension API {
     
     func prepareURLRequestFor(
-        router: Router,
-        parameters: [String: Any]? = nil,
-        headers: [String: String]? = nil,
-        method: RequestMethod = .get
-    ) -> URLRequest? {
-        
-        let urlString = baseURL + router.path + "&key=" + apiKey
-        guard let url = URL(string: urlString) else { return nil }
-        
-        var request = URLRequest(url: url)
-        
-        if let params = parameters {
+            router: Router,
+            parameters: [String: Any]? = nil,
+            headers: [String: String]? = nil,
+            method: RequestMethod = .get
+        ) -> URLRequest? {
             
-            if method == .get {
-                guard var urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
-                    return nil
-                }
-                
-                let queryItems = params.map {
-                    URLQueryItem(name: $0.key, value: String(describing: $0.value))
-                }
-                
-                urlComponents.queryItems = (urlComponents.queryItems ?? []) + queryItems
-                
-                guard let newUrl = urlComponents.url else { return nil }
-                
-                request = URLRequest(url: newUrl)
-            } else {
-                let jsonData = try? JSONSerialization.data(withJSONObject: params, options: .prettyPrinted)
-                request.httpBody = jsonData
+            let delimiter: String
+            switch router {
+            case .gameDetails:
+                delimiter = "?"
+            default:
+                delimiter = "&"
             }
-        }
-        
-        request.httpMethod = method.rawValue
-        
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        if let requestHeaders = headers {
-            for (field, value) in requestHeaders {
-                request.setValue(value, forHTTPHeaderField: field)
+
+            let urlString = baseURL + router.path + delimiter + "key=" + apiKey
+            guard let url = URL(string: urlString) else { return nil }
+            
+            var request = URLRequest(url: url)
+            
+            if let params = parameters {
+                if method == .get {
+                    guard var urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: true) else {
+                        return nil
+                    }
+                    
+                    let queryItems = params.map {
+                        URLQueryItem(name: $0.key, value: String(describing: $0.value))
+                    }
+                    
+                    urlComponents.queryItems = (urlComponents.queryItems ?? []) + queryItems
+                    
+                    guard let newUrl = urlComponents.url else { return nil }
+                    
+                    request = URLRequest(url: newUrl)
+                } else {
+                    let jsonData = try? JSONSerialization.data(withJSONObject: params, options: .prettyPrinted)
+                    request.httpBody = jsonData
+                }
             }
+            
+            request.httpMethod = method.rawValue
+            
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            
+            if let requestHeaders = headers {
+                for (field, value) in requestHeaders {
+                    request.setValue(value, forHTTPHeaderField: field)
+                }
+            }
+            
+            return request
         }
-        
-        return request
-    }
     
     func executeRequestFor<T: Decodable>(
         router: Router,

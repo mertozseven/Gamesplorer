@@ -19,14 +19,15 @@ class GamesCell: UICollectionViewCell {
         image: UIImage(systemName: "star")?.resized(to: CGSize(width: 64, height: 64)),
         contentMode: .scaleAspectFill,
         clipsToBounds: true,
-        cornerRadius: 10
+        cornerRadius: 10/57 * 64
     )
     
     private let gameTitle = GPLabel(
         text: "",
         textAlignment: .left,
         textColor: .label,
-        font: .preferredFont(forTextStyle: .headline)
+        font: .preferredFont(forTextStyle: .headline),
+        numberOfLines: 0
     )
     
     private let metacriticLogo = GPImageView(
@@ -80,7 +81,7 @@ class GamesCell: UICollectionViewCell {
         } else {
             releaseDate.text = "Unknown"
         }
-        loadImage()
+        gameIcon.loadImage(from: game.background_image)
         configureView()
     }
     
@@ -143,25 +144,6 @@ class GamesCell: UICollectionViewCell {
             trailing: trailingAnchor,
             paddingTrailing: 16,
             height: 1
-        )
-    }
-    
-    private func loadImage() {
-        guard let url = URL(string: game.background_image ?? "") else { return }
-        
-        let downsampling = DownsamplingImageProcessor(size: gameIcon.bounds.size)
-        let processor = downsampling
-        
-        gameIcon.kf.indicatorType = .activity
-        gameIcon.kf.setImage(
-            with: url,
-            placeholder: UIImage(named: "placeholder"),
-            options: [
-                .processor(processor),
-                .scaleFactor(UIScreen.main.scale),
-                .transition(.fade(1)),
-                .cacheOriginalImage
-            ]
         )
     }
     
